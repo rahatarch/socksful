@@ -23,6 +23,25 @@ const colors = [
   { name: "Amber", value: "#d97706" },
 ];
 
+interface NavbarUser {
+  name: string;
+  email: string;
+}
+
+interface SearchProduct {
+  name: string;
+  showIn?: string;
+}
+
+const isNavbarUser = (value: unknown): value is NavbarUser => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const user = value as Partial<NavbarUser>;
+  return typeof user.name === "string" && typeof user.email === "string";
+};
+
 export default function Navbar() {
   const [activeColor, setActiveColor] = useState("#2563eb");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -30,9 +49,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [user, setUser] = useState<{ name: string; email: string } | null>(
-    null,
-  );
+  const [user, setUser] = useState<NavbarUser | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -48,7 +65,17 @@ export default function Navbar() {
     }
 
     const savedUser = localStorage.getItem("socksful-user");
-    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedUser) {
+      try {
+        const parsedUser: unknown = JSON.parse(savedUser);
+        setUser(isNavbarUser(parsedUser) ? parsedUser : null);
+      } catch {
+        localStorage.removeItem("socksful-user");
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
   }, [pathname]); // পেজ চেঞ্জ হলে ইউজার স্ট্যাটাস চেক করবে
 
   const handleColorChange = (color: string) => {
@@ -57,12 +84,18 @@ export default function Navbar() {
     localStorage.setItem("socksful-color", color);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("socksful-user");
-    setUser(null);
-    setIsAccountOpen(false);
-    setIsMenuOpen(false);
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      localStorage.removeItem("socksful-user");
+      setUser(null);
+      setIsAccountOpen(false);
+      setIsMenuOpen(false);
+      router.push("/");
+    }
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -72,15 +105,20 @@ export default function Navbar() {
 
     try {
       const res = await fetch("/api/products");
-      const data = await res.json();
-      
-      if (data.success) {
-        const matchedProduct = data.data.find((p: any) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const data: { success?: boolean; data?: SearchProduct[] } =
+        await res.json();
+
+      if (data.success && Array.isArray(data.data)) {
+        const query = searchQuery.toLowerCase();
+        const matchedProduct = data.data.find((p) =>
+          p.name.toLowerCase().includes(query),
         );
 
         if (matchedProduct) {
-          const destination = matchedProduct.showIn === "gift-sets" ? "/gift-sets" : "/collections";
+          const destination =
+            matchedProduct.showIn === "gift-sets"
+              ? "/gift-sets"
+              : "/collections";
           router.push(`${destination}?q=${encodeURIComponent(searchQuery)}`);
         } else {
           router.push(`/collections?q=${encodeURIComponent(searchQuery)}`);

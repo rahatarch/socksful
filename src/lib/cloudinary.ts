@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 
 // Cloudinary কনফিগারেশন
 cloudinary.config({
@@ -10,12 +10,12 @@ cloudinary.config({
 /**
  * আপলোড ফাংশন: এটি একটি ইমেজ ফাইলকে বাফার থেকে ক্লাউডিনারিতে আপলোড করে।
  */
-export const uploadImage = async (file: File) => {
+export const uploadImage = async (file: File): Promise<UploadApiResponse> => {
   // ফাইলটিকে বাফারে রূপান্তর করা
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  return new Promise((resolve, reject) => {
+  return new Promise<UploadApiResponse>((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "socksful", // ক্লাউডিনারিতে SocksFul ফোল্ডারে সেভ হবে
@@ -26,6 +26,12 @@ export const uploadImage = async (file: File) => {
           console.error("Cloudinary Upload Error:", error);
           return reject(error);
         }
+        if (!result) {
+          return reject(
+            new Error("Cloudinary returned an empty upload result"),
+          );
+        }
+
         resolve(result);
       },
     );

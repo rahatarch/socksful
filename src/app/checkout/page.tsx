@@ -211,107 +211,170 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* ৩. পেমেন্ট মেথড */}
-            <div className="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-sm">
-              <h2 className="text-xl font-bold mb-2 flex items-center gap-3">
-                <span className="w-8 h-8 bg-brand/10 text-brand rounded-full flex items-center justify-center text-sm font-bold">
+            {/* 3. PAYMENT METHOD (Fully English, Upgraded Card Design) */}
+            <div className="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-xl">
+              <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-4">
+                <span className="w-10 h-10 md:w-12 md:h-12 bg-brand/10 text-brand rounded-full flex items-center justify-center text-lg md:text-xl font-extrabold shadow-lg border-2 border-brand/20">
                   3
                 </span>
                 Payment Method
               </h2>
-              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest mb-8 ml-11">
-                Advance delivery charge (120BDT) is mandatory.
+              <p className="text-xs md:text-sm text-gray-400 font-bold uppercase tracking-wide mb-8 ml-14">
+                Advance delivery charge (120 BDT) is required to place an order.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
                 <button
                   onClick={() => setPaymentMethod("mobile")}
-                  className={`flex items-center justify-between p-5 rounded-3xl border-2 transition-all cursor-pointer ${paymentMethod === "mobile" ? "border-brand bg-brand/5" : "border-gray-50 bg-gray-50"}`}
+                  className={`flex items-center justify-between px-3 md:px-5 py-3 md:py-4 rounded-2xl border-2 transition-all cursor-pointer gap-2
+                    ${
+                      paymentMethod === "mobile"
+                        ? "border-brand bg-brand/10 ring-1 ring-brand"
+                        : "border-gray-100 bg-gray-50 hover:border-brand/20"
+                    }`}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 md:gap-3">
                     <Smartphone
-                      size={24}
+                      size={20}
                       className={
                         paymentMethod === "mobile"
                           ? "text-brand"
                           : "text-gray-400"
                       }
                     />
-                    <div className="text-left">
-                      <p className="font-bold text-sm">Mobile Banking</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">
+                    <div>
+                      <p className="font-bold text-sm md:text-base leading-tight">
+                        Mobile Banking
+                      </p>
+                      <p className="text-[9px] md:text-[11px] text-gray-400">
                         Full Payment
                       </p>
                     </div>
                   </div>
                   {paymentMethod === "mobile" && (
-                    <CheckCircle2 size={20} className="text-brand" />
+                    <CheckCircle2 size={16} className="text-brand" />
                   )}
                 </button>
                 <button
                   onClick={() => setPaymentMethod("cod")}
-                  className={`flex items-center justify-between p-5 rounded-3xl border-2 transition-all cursor-pointer ${paymentMethod === "cod" ? "border-brand bg-brand/5" : "border-gray-50 bg-gray-50"}`}
+                  className={`flex items-center justify-between px-3 md:px-5 py-3 md:py-4 rounded-2xl border-2 transition-all cursor-pointer gap-2
+                    ${
+                      paymentMethod === "cod"
+                        ? "border-brand bg-brand/10 ring-1 ring-brand"
+                        : "border-gray-100 bg-gray-50 hover:border-brand/20"
+                    }`}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 md:gap-3">
                     <Truck
-                      size={24}
+                      size={20}
                       className={
                         paymentMethod === "cod" ? "text-brand" : "text-gray-400"
                       }
                     />
-                    <div className="text-left">
-                      <p className="font-bold text-sm">Cash on Delivery</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">
-                        Pay Charge Only
+                    <div>
+                      <p className="font-bold text-sm md:text-base leading-tight">
+                        Cash on Delivery
+                      </p>
+                      <p className="text-[9px] md:text-[11px] text-gray-400">
+                        Delivery Charge Only
                       </p>
                     </div>
                   </div>
                   {paymentMethod === "cod" && (
-                    <CheckCircle2 size={20} className="text-brand" />
+                    <CheckCircle2 size={16} className="text-brand" />
                   )}
                 </button>
               </div>
-              <div className="bg-gray-50 p-6 rounded-[28px] border border-gray-100 space-y-6">
-                <div className="flex flex-wrap gap-2">
-                  {providers.map((p) => (
-                    <button
-                      key={p.value}
-                      onClick={() => setSelectedProvider(p.value)}
-                      className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${selectedProvider === p.value ? `${p.color} text-white shadow-lg` : "bg-white text-gray-400 hover:text-black"}`}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-100">
-                  <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                    Please send{" "}
-                    <span className="font-bold text-black">
-                      {payableNow}BDT
-                    </span>{" "}
-                    to <span className="font-bold text-black">017XXXXXXXX</span>{" "}
-                    using{" "}
-                    <span className="font-bold capitalize text-brand">
-                      {selectedProvider}
-                    </span>{" "}
-                    Personal number.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Sender Phone Number"
-                    value={senderNumber}
-                    onChange={(e) => setSenderNumber(e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 outline-none focus:border-brand transition-all font-medium"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Transaction ID (TrxID)"
-                    value={trxId}
-                    onChange={(e) => setTrxId(e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 outline-none focus:border-brand transition-all font-medium"
-                  />
-                </div>
+
+              <div className="mt-0">
+                <ol className="space-y-5 md:space-y-6 pl-2 md:pl-6 list-decimal list-inside text-black font-jakarta text-sm md:text-base">
+                  <li>
+                    <span className="font-medium">
+                      Select your mobile banking provider:
+                    </span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 items-center">
+                      {providers.map((p) => (
+                        <button
+                          key={p.value}
+                          type="button"
+                          onClick={() => setSelectedProvider(p.value)}
+                          className={`flex items-center gap-2 px-5 py-3 md:px-6 md:py-3 rounded-2xl font-extrabold text-[13px] md:text-base uppercase border-2 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-brand/30
+                          ${
+                            selectedProvider === p.value
+                              ? `bg-brand text-white border-brand ring-2 ring-brand`
+                              : `bg-gray-50 text-gray-600 border-gray-200 hover:border-brand`
+                          }`}
+                          aria-label={p.name}
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  </li>
+                  <li>
+                    <span className="font-medium">
+                      Send <b>{payableNow} BDT</b> to our{" "}
+                      <b className="capitalize text-brand">
+                        {selectedProvider}
+                      </b>{" "}
+                      personal number below:
+                    </span>
+                    <div className="w-full flex items-center mt-6 mb-4">
+                      <span className="font-black tracking-widest select-all text-base md:text-xl bg-brand/10 text-brand px-5 py-3 md:py-3 rounded-2xl border border-brand/10 shadow-sm">
+                        01327904782
+                      </span>
+                    </div>
+                    <span className="block text-xs text-gray-500 mt-1">
+                      (Send Money option only. Always send as Personal, not
+                      Merchant/Payment.)
+                    </span>
+                  </li>
+                  <li>
+                    <span className="font-medium">
+                      Enter the <b>Sender Phone Number</b> and{" "}
+                      <b>Transaction ID (TrxID)</b> used for payment:
+                    </span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mt-4 w-full items-end">
+                      <div className="flex flex-col gap-2">
+                        <label
+                          htmlFor="sender-number"
+                          className="text-xs font-semibold mb-1 text-black/70"
+                        >
+                          Sender Phone Number
+                        </label>
+                        <input
+                          id="sender-number"
+                          type="text"
+                          placeholder="eg. 01XXXXXXXXX"
+                          value={senderNumber}
+                          onChange={(e) => setSenderNumber(e.target.value)}
+                          className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:border-brand transition-all font-semibold text-base"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label
+                          htmlFor="trx-id"
+                          className="text-xs font-semibold mb-1 text-black/70"
+                        >
+                          Transaction ID (TrxID)
+                        </label>
+                        <input
+                          id="trx-id"
+                          type="text"
+                          placeholder="TrxID Code"
+                          value={trxId}
+                          onChange={(e) => setTrxId(e.target.value)}
+                          className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:border-brand transition-all font-semibold text-base"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="font-medium">
+                      After successful payment and form submission you will get
+                      order confirmation via SMS and Email.
+                    </span>
+                  </li>
+                </ol>
               </div>
             </div>
           </div>

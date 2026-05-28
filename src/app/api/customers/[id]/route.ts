@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { badRequest, forbidden } from "@/lib/auth";
+import { getAdminUser } from "@/lib/server-auth";
 
 /**
  * PATCH: Update customer status (Ban/Unban)
@@ -11,14 +13,22 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const admin = await getAdminUser(req);
+
+    if (!admin) {
+      return forbidden();
+    }
+
     const { id } = await params;
+
+    if (!ObjectId.isValid(id)) {
+      return badRequest("Invalid customer id");
+    }
+
     const { status } = await req.json();
 
-    if (!status) {
-      return NextResponse.json(
-        { success: false, error: "Status is required" },
-        { status: 400 },
-      );
+    if (status !== "Active" && status !== "Banned") {
+      return badRequest("Status must be Active or Banned");
     }
 
     const client = await clientPromise;
@@ -28,7 +38,7 @@ export async function PATCH(
       { _id: new ObjectId(id) },
       {
         $set: {
-          status: status,
+          status,
           updatedAt: new Date(),
         },
       },
@@ -45,7 +55,7 @@ export async function PATCH(
       success: true,
       message: `Customer status updated to ${status}`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update Customer API Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update customer status" },

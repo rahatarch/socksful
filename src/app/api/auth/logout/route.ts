@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clearSessionCookie } from "@/lib/auth";
 
 /**
  * POST: Clear the secure session cookie
@@ -10,12 +11,7 @@ export async function POST() {
     message: "Logged out successfully",
   });
 
-  // কুকি রিমুভ করা (Expiration set to past)
-  response.cookies.set("socksful-session", "", {
-    httpOnly: true,
-    expires: new Date(0),
-    path: "/",
-  });
+  clearSessionCookie(response);
 
   return response;
 }

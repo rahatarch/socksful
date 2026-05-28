@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
+import { setSessionCookie, type SessionUser } from "@/lib/auth";
 
 /**
  * POST: Authenticate user credentials
@@ -41,7 +42,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // ৪. পাসওয়ার্ড ভেরিফাই করা
+    // ৪. ইমেইল ভেরিফিকেশন চেক
+    if (user.isVerified === false) {
+      return NextResponse.json(
+        { error: "Please verify your email before signing in." },
+        { status: 403 },
+      );
+    }
+
+    // ৫. পাসওয়ার্ড ভেরিফাই করা
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -51,12 +60,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // ৫. সফল রেসপন্স এবং সিকিউর কুকি সেট করা
-    const userData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role || "user",
+    // ৬. সফল রেসপন্স এবং signed secure কুকি সেট করা
+    const userData: SessionUser = {
+      id: user._id.toString(),
+      name: String(user.name),
+      email: String(user.email).toLowerCase().trim(),
+      role: user.role === "admin" ? "admin" : "user",
     };
 
     const response = NextResponse.json({
@@ -65,17 +74,10 @@ export async function POST(req: Request) {
       user: userData,
     });
 
-    // কুকি সেট করা (Middleware যাতে এটি রিড করতে পারে)
-    response.cookies.set("socksful-session", JSON.stringify(userData), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // ৭ দিন
-      path: "/",
-    });
+    setSessionCookie(response, userData);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Login API Error:", error);
     return NextResponse.json(
       { error: "An error occurred during sign in" },

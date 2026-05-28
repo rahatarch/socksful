@@ -7,8 +7,6 @@ import { SearchX, ArrowRight, Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const categories = ["All", "Casual", "Formal", "Sports", "Limited Edition"];
-
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -29,32 +27,47 @@ function CollectionsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get("q");
+
   const [activeCategory, setActiveCategory] = useState("All");
+  const [categories, setCategories] = useState<string[]>(["All"]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/products", { cache: 'no-store' });
-        const data = await res.json();
-        if (data.success) {
+        // Ekshathe product ar category fetch korchi efficiency-r jonno
+        const [prodRes, catRes] = await Promise.all([
+          fetch("/api/products", { cache: "no-store" }),
+          fetch("/api/categories?type=products", { cache: "no-store" }),
+        ]);
+
+        const prodData = await prodRes.json();
+        const catData = await catRes.json();
+
+        if (prodData.success) {
           // Map MongoDB _id to id for component compatibility
-          setAllProducts(data.data.map((p: any) => ({ ...p, id: p._id })));
+          setAllProducts(prodData.data.map((p: any) => ({ ...p, id: p._id })));
+        }
+
+        if (catData.success) {
+          setCategories(catData.data);
         }
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const displayedProducts = useMemo(() => {
     // Filter to show only items meant for the main products collection
-    let filtered = allProducts.filter(p => p.showIn === 'products' || !p.showIn);
-    
+    let filtered = allProducts.filter(
+      (p) => p.showIn === "products" || !p.showIn,
+    );
+
     if (query) {
       filtered = filtered.filter((p) =>
         p.name.toLowerCase().includes(query.toLowerCase()),
@@ -69,7 +82,9 @@ function CollectionsContent() {
     return (
       <div className="max-w-[1440px] mx-auto px-4 md:px-12 pt-24 md:pt-32 pb-40 flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-brand" size={40} />
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Curating Collection...</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+          Curating Collection...
+        </p>
       </div>
     );
   }
@@ -77,9 +92,11 @@ function CollectionsContent() {
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-12 pt-24 md:pt-32 pb-20 font-jakarta text-left">
       <div className="flex flex-col gap-10">
-        {/* Top Horizontal Filter */}
+        {/* Top Horizontal Filter - Ekhon database theke dynamic asche */}
         <div className="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar border-b border-gray-100">
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mr-4 shrink-0">Filter By</span>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mr-4 shrink-0">
+            Filter By
+          </span>
           <div className="flex gap-2">
             {categories.map((cat) => (
               <button
@@ -100,7 +117,7 @@ function CollectionsContent() {
           </div>
         </div>
 
-        {/* মেইন কন্টেন্ট */}
+        {/* Main Content */}
         <div className="w-full">
           <AnimatePresence mode="wait">
             {displayedProducts.length > 0 ? (
@@ -176,7 +193,6 @@ function CollectionsContent() {
                           </div>
                         </div>
 
-                        {/* Buy Now বাটনটিকে Link এ রূপান্তর করা হয়েছে */}
                         <Link
                           href={`/product/${p.id}`}
                           className="w-full bg-black text-white py-3.5 md:py-4 rounded-[16px] md:rounded-[20px] font-bold text-[10px] md:text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-brand active:bg-brand shadow-sm cursor-pointer text-center"
@@ -189,7 +205,6 @@ function CollectionsContent() {
                 </motion.div>
               </motion.div>
             ) : (
-              /* PRODUCT NOT FOUND SCREEN */
               <motion.div
                 key="not-found"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -207,10 +222,7 @@ function CollectionsContent() {
                   <span className="text-brand">&quot;{query}&quot;</span>.
                 </p>
                 <Link href="/collections" className="w-full sm:w-auto">
-                  <button
-                    onClick={() => router.push("/collections")}
-                    className="w-full sm:w-auto group flex items-center justify-center gap-3 bg-black text-white px-8 py-4 rounded-full font-bold text-xs md:text-sm tracking-widest hover:bg-brand active:scale-95 transition-all cursor-pointer"
-                  >
+                  <button className="w-full sm:w-auto group flex items-center justify-center gap-3 bg-black text-white px-8 py-4 rounded-full font-bold text-xs md:text-sm tracking-widest hover:bg-brand active:scale-95 transition-all cursor-pointer">
                     Clear Search
                     <ArrowRight
                       size={18}

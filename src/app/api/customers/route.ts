@@ -1,19 +1,36 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { forbidden } from "@/lib/auth";
+import { getAdminUser } from "@/lib/server-auth";
 
 /**
  * GET: Fetch all customers for the Admin Panel
  * Includes a join logic to count total orders per customer from the 'orders' collection
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const admin = await getAdminUser(req);
+
+    if (!admin) {
+      return forbidden();
+    }
+
     const client = await clientPromise;
     const db = client.db("socksful_db");
 
     // ১. সব ইউজারদের তুলে আনা (পাসওয়ার্ড বাদ দিয়ে)
     const users = await db
       .collection("users")
-      .find({}, { projection: { password: 0 } })
+      .find(
+        {},
+        {
+          projection: {
+            password: 0,
+            otp: 0,
+            otpExpires: 0,
+          },
+        },
+      )
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -37,13 +54,18 @@ export async function GET() {
       );
       return {
         ...user,
-        id: user._id,
+        id: user._id.toString(),
+        joined: user.createdAt
+          ? new Date(user.createdAt).toLocaleDateString("en-GB")
+          : "N/A",
+        phone: user.phone || "N/A",
+        status: user.status || "Active",
         totalOrders: orderData ? orderData.totalOrders : 0,
       };
     });
 
     return NextResponse.json({ success: true, data: customers });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Fetch Customers API Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch customer list" },

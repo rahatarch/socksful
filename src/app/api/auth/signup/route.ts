@@ -17,17 +17,35 @@ export async function POST(req: Request) {
       );
     }
 
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const normalizedName = String(name).trim();
+
+    if (String(password).length < 6) {
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters" },
+        { status: 400 },
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db("socksful_db");
 
     // ইউজার অলরেডি আছে কি না চেক করা
     const existingUser = await db
       .collection("users")
-      .findOne({ email: email.toLowerCase() });
-    if (existingUser) {
+      .findOne({ email: normalizedEmail });
+
+    if (existingUser?.isVerified) {
       return NextResponse.json(
         { error: "User already exists" },
         { status: 400 },
+      );
+    }
+
+    if (existingUser?.status === "Banned") {
+      return NextResponse.json(
+        { error: "This account has been restricted. Contact support." },
+        { status: 403 },
       );
     }
 
@@ -39,29 +57,32 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const newUser = {
-      name,
-      email: email.toLowerCase(),
+      name: normalizedName,
+      email: normalizedEmail,
       password: hashedPassword,
       role: "user",
       status: "Active",
       isVerified: false, // শুরুতে আনভেরিফাইড থাকবে
       otp,
       otpExpires,
-      createdAt: new Date(),
+      createdAt: existingUser?.createdAt || new Date(),
+      updatedAt: new Date(),
     };
 
     // ডাটাবেজে সেভ করা (যদি আগে থেকে আনভেরিফাইড থাকে তবে আপডেট হবে)
-    await db.collection("users").updateOne(
-      { email: email.toLowerCase() },
-      { $set: newUser },
-      { upsert: true }
-    );
+    await db
+      .collection("users")
+      .updateOne(
+        { email: normalizedEmail },
+        { $set: newUser },
+        { upsert: true },
+      );
 
     // ইমেইল পাঠানো
     try {
       await resend.emails.send({
         from: "SocksFul <onboarding@resend.dev>",
-        to: email.toLowerCase(),
+        to: normalizedEmail,
         subject: "Verify your SocksFul Account",
         html: `
           <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -76,15 +97,18 @@ export async function POST(req: Request) {
       });
     } catch (emailError) {
       console.error("Resend Error:", emailError);
-      return NextResponse.json({ error: "Failed to send verification email" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to send verification email" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({
       success: true,
       message: "OTP sent to your email",
-      email: email.toLowerCase(),
+      email: normalizedEmail,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Signup API Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

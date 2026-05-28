@@ -12,7 +12,7 @@ let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === "development") {
   // ডেভেলপমেন্ট মোডে কানেকশন বারবার তৈরি হওয়া রোধ করতে গ্লোবাল ভেরিয়েবল ব্যবহার করা হয়
-  let globalWithMongo = global as typeof globalThis & {
+  const globalWithMongo = global as typeof globalThis & {
     _mongoClientPromise?: Promise<MongoClient>;
   };
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { setSessionCookie, type SessionUser } from "@/lib/auth";
 
 /**
  * POST: Verify the 6-digit OTP sent to the user's email
@@ -21,11 +22,25 @@ export async function POST(req: Request) {
 
     // ১. ইউজার খুঁজে বের করা
     const user = await db.collection("users").findOne({
-      email: email.toLowerCase().trim(),
+      email: String(email).toLowerCase().trim(),
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (user.status === "Banned") {
+      return NextResponse.json(
+        { error: "This account has been restricted. Contact support." },
+        { status: 403 },
+      );
+    }
+
+    if (user.isVerified) {
+      return NextResponse.json(
+        { error: "This account is already verified" },
+        { status: 400 },
+      );
     }
 
     // ২. ওটিপি ম্যাচ করছে কি না চেক করা
@@ -53,11 +68,11 @@ export async function POST(req: Request) {
       },
     );
 
-    const userData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role || "user",
+    const userData: SessionUser = {
+      id: user._id.toString(),
+      name: String(user.name),
+      email: String(user.email).toLowerCase().trim(),
+      role: user.role === "admin" ? "admin" : "user",
     };
 
     const response = NextResponse.json({
@@ -66,17 +81,10 @@ export async function POST(req: Request) {
       user: userData,
     });
 
-    // সেশন কুকি সেট করা (Middleware যাতে এটি রিড করতে পারে)
-    response.cookies.set("socksful-session", JSON.stringify(userData), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // ৭ দিন
-      path: "/",
-    });
+    setSessionCookie(response, userData);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("OTP Verification Error:", error);
     return NextResponse.json(
       { error: "An error occurred during verification" },

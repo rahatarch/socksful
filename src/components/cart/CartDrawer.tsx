@@ -91,12 +91,14 @@ export default function CartDrawer() {
                   <p className="text-gray-400 font-medium">
                     Your bag is empty.
                   </p>
-                  <button
-                    onClick={toggleCart}
-                    className="mt-4 text-brand font-bold text-sm underline cursor-pointer"
-                  >
-                    Start Shopping
-                  </button>
+                  <Link href="/collections">
+                    <button
+                      onClick={toggleCart}
+                      className="mt-4 text-brand font-bold text-sm underline cursor-pointer"
+                    >
+                      Start Shopping
+                    </button>
+                  </Link>
                 </div>
               ) : (
                 items.map((item) => (

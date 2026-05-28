@@ -6,16 +6,6 @@ import { Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const giftCategories = [
-  "All Sets",
-  "Luxury Box",
-  "Couple Sets",
-  "Seasonal",
-  "Budget Friendly",
-];
-
-
-
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -34,25 +24,37 @@ const itemVariants: Variants = {
 
 export default function GiftSetsPage() {
   const [activeCategory, setActiveCategory] = useState("All Sets");
+  const [categories, setCategories] = useState<string[]>(["All Sets"]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/products", { cache: "no-store" });
-        const data = await res.json();
-        if (data.success) {
+        // Fetching both products and gift-set specific categories
+        const [prodRes, catRes] = await Promise.all([
+          fetch("/api/products", { cache: "no-store" }),
+          fetch("/api/categories?type=gift-sets", { cache: "no-store" }),
+        ]);
+
+        const prodData = await prodRes.json();
+        const catData = await catRes.json();
+
+        if (prodData.success) {
           // Map MongoDB _id to id for component compatibility
-          setAllProducts(data.data.map((p: any) => ({ ...p, id: p._id })));
+          setAllProducts(prodData.data.map((p: any) => ({ ...p, id: p._id })));
+        }
+
+        if (catData.success) {
+          setCategories(catData.data);
         }
       } catch (error) {
-        console.error("Failed to load gift sets:", error);
+        console.error("Failed to load gift sets data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const filteredSets = useMemo(() => {
@@ -86,13 +88,13 @@ export default function GiftSetsPage() {
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-12 pt-24 md:pt-32 pb-20 font-jakarta">
         <div className="flex flex-col lg:flex-row gap-8 md:gap-12">
-          {/* সাইডবার */}
+          {/* Side Navigation - Dynamic from Database */}
           <aside className="w-full lg:w-64 shrink-0">
             <h2 className="hidden lg:block text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-8 px-2">
               Gift Occasions
             </h2>
             <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 no-scrollbar">
-              {giftCategories.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -108,7 +110,7 @@ export default function GiftSetsPage() {
             </div>
           </aside>
 
-          {/* মেইন গ্রিড */}
+          {/* Main Content Grid */}
           <div className="flex-1 text-left">
             <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-8 md:mb-12 px-2 gap-4">
               <motion.h1
@@ -182,7 +184,6 @@ export default function GiftSetsPage() {
                       </div>
                     </div>
 
-                    {/* Send as Gift বাটনটিকে Link এ রূপান্তর করা হয়েছে */}
                     <Link
                       href={`/product/${s.id}`}
                       className="w-full bg-black text-white py-3.5 md:py-4 rounded-[16px] md:rounded-[20px] font-bold text-[10px] md:text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-brand active:bg-brand shadow-sm cursor-pointer text-center"

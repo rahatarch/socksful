@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   ExternalLink,
   LogOut,
+  Settings2,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -36,6 +37,11 @@ export default function AdminLayout({
     { name: "Orders", href: "/admin/orders", icon: <ShoppingCart size={20} /> },
     { name: "Products", href: "/admin/products", icon: <Package size={20} /> },
     { name: "Customers", href: "/admin/customers", icon: <Users size={20} /> },
+    {
+      name: "Settings",
+      href: "/admin/settings",
+      icon: <Settings2 size={20} />,
+    },
   ];
 
   return (
