@@ -47,7 +47,7 @@ export default function HelpPage() {
       <Navbar />
 
       {/* ১. হিরো সেকশন - রেসপনসিভ প্যাডিং ও ফন্ট */}
-      <section className="pt-28 md:pt-40 pb-12 md:pb-20 px-6 text-center">
+      <section className="pt-16 sm:pt-28 md:pt-40 pb-6 sm:pb-12 md:pb-20 px-2 sm:px-4 md:px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,8 +69,8 @@ export default function HelpPage() {
       </section>
 
       {/* ২. ইন্টারেক্টিভ সাপোর্ট কার্ডস - মোবাইলে ১ কলাম গ্রিড */}
-      <section className="pb-20 md:pb-32 px-6">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+      <section className="pb-8 sm:pb-16 md:pb-32 px-2 sm:px-4 md:px-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {supportCards.map((card, idx) => (
             <motion.a
               key={card.title}
@@ -78,11 +78,11 @@ export default function HelpPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="group bg-white p-8 md:p-10 rounded-[32px] md:rounded-[48px] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col items-start text-left relative overflow-hidden active:scale-[0.98] md:active:scale-100"
+              className="group bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-[20px] sm:rounded-[32px] md:rounded-[48px] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col items-start text-left relative overflow-hidden active:scale-[0.98] md:active:scale-100 min-w-0"
             >
               {/* লাইভ ইন্ডিকেটর */}
               {card.isLive && (
-                <div className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-2 bg-green-100 px-3 py-1 rounded-full">
+                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 md:top-8 md:right-8 flex items-center gap-1 sm:gap-2 bg-green-100 px-2 sm:px-3 py-1 rounded-full">
                   <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse"></span>
                   <span className="text-[9px] md:text-[10px] font-bold text-green-600 uppercase tracking-widest">
                     Live Now
@@ -91,15 +91,15 @@ export default function HelpPage() {
               )}
 
               <div
-                className={`p-3 md:p-4 rounded-2xl md:rounded-3xl mb-6 md:mb-8 ${card.color} transition-transform group-hover:scale-110 duration-500`}
+                className={`p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl md:rounded-3xl mb-3 sm:mb-6 md:mb-8 ${card.color} transition-transform group-hover:scale-110 duration-500`}
               >
                 {card.icon}
               </div>
 
-              <h3 className="text-xl md:text-2xl font-bold text-black mb-3 md:mb-4">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-2 sm:mb-3 md:mb-4">
                 {card.title}
               </h3>
-              <p className="text-gray-400 text-sm md:text-base font-medium mb-8 md:mb-10 leading-relaxed">
+              <p className="text-gray-400 text-xs sm:text-sm md:text-base font-medium mb-4 sm:mb-6 md:mb-10 leading-relaxed">
                 {card.description}
               </p>
 
@@ -113,9 +113,9 @@ export default function HelpPage() {
       </section>
 
       {/* ৩. এফএকিউ হাইলাইট - মোবাইল অপ্টিমাইজড লিস্ট */}
-      <section className="py-16 md:py-24 bg-white border-t border-gray-50">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 md:mb-12">
+      <section className="py-8 sm:py-16 md:py-24 bg-white border-t border-gray-50">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-8 md:mb-12">
             Common Questions
           </h2>
           <div className="space-y-3 md:space-y-4">
@@ -126,12 +126,12 @@ export default function HelpPage() {
             ].map((q) => (
               <div
                 key={q}
-                className="group p-5 md:p-6 bg-[#fafafa] rounded-2xl md:rounded-3xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors active:scale-[0.99]"
+                className="group p-3 sm:p-4 md:p-6 bg-[#fafafa] rounded-xl sm:rounded-2xl md:rounded-3xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors active:scale-[0.99] min-w-0"
               >
-                <span className="font-bold text-gray-800 text-sm md:text-base text-left pr-4">
+                <span className="font-bold text-gray-800 text-xs sm:text-sm md:text-base text-left pr-2 sm:pr-4">
                   {q}
                 </span>
-                <div className="shrink-0 w-8 h-8 rounded-full bg-white flex items-center justify-center text-brand shadow-sm group-hover:bg-brand group-hover:text-white transition-all duration-300">
+                <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-brand shadow-sm group-hover:bg-brand group-hover:text-white transition-all duration-300">
                   <ArrowRight size={16} />
                 </div>
               </div>

@@ -10,17 +10,42 @@ import {
   MapPin,
   CreditCard,
   Package,
-  Phone,
-  Mail,
   CircleDollarSign,
   Loader2,
 } from "lucide-react";
 
+// TypeScript interface for Order, based on current data shape
+interface Order {
+  _id: string;
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    district: string;
+  };
+  payment: {
+    method: string;
+    provider: string;
+    sender: string;
+    transactionId: string;
+  };
+  status: "Pending" | "Confirmed" | "Delivered" | "Canceled";
+  totalAmount: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+}
+
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("All");
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // ফিল্টার লিস্ট আপডেট করা হয়েছে
   const filters = ["All", "Pending", "Confirmed", "Delivered", "Canceled"];
@@ -30,9 +55,10 @@ export default function AdminOrders() {
       const res = await fetch("/api/orders");
       const data = await res.json();
       if (data.success) setOrders(data.data);
-    } catch (error) {
-      console.error("Failed to load orders");
+    } catch {
+      // error intentionally ignored
     } finally {
+      // console.error("Failed to load orders");
       setLoading(false);
     }
   };
@@ -42,7 +68,7 @@ export default function AdminOrders() {
   }, []);
 
   // ডাটাবেজে স্ট্যাটাস আপডেট করার আসল লজিক
-  const updateOrderStatus = async (id: string, newStatus: string) => {
+  const updateOrderStatus = async (id: string, newStatus: Order["status"]) => {
     try {
       const response = await fetch(`/api/orders/${id}`, {
         method: "PATCH",
@@ -58,13 +84,15 @@ export default function AdminOrders() {
           ),
         );
         if (selectedOrder?._id === id) {
-          setSelectedOrder((prev: any) => ({ ...prev, status: newStatus }));
+          setSelectedOrder((prev) =>
+            prev ? { ...prev, status: newStatus } : prev,
+          );
         }
       } else {
         alert("Failed to update status in database.");
       }
-    } catch (error) {
-      alert("Error updating order.");
+    } catch {
+      // error intentionally ignored
     }
   };
 
@@ -110,8 +138,10 @@ export default function AdminOrders() {
         </div>
       </header>
 
-      <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden text-left">
-        <div className="overflow-x-auto no-scrollbar">
+      {/* Responsive Table + Card: mobile card, tablet/pc table */}
+      <div className="bg-white rounded-[20px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden text-left">
+        {/* Desktop/Tablet Table */}
+        <div className="hidden md:block overflow-x-auto no-scrollbar">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
@@ -216,6 +246,85 @@ export default function AdminOrders() {
             </tbody>
           </table>
         </div>
+        {/* Mobile Card Layout */}
+        <div className="md:hidden flex flex-col gap-4 p-1.5">
+          {filteredOrders.map((order) => (
+            <div
+              key={order._id}
+              className="bg-gray-50 rounded-[18px] p-4 border border-gray-100 flex flex-col gap-2"
+            >
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div>
+                  <span className="font-bold text-black text-base">
+                    {order.customer.firstName} {order.customer.lastName}
+                  </span>
+                  <div className="text-[10px] text-gray-400 uppercase mt-0.5 font-bold">
+                    ID: #SF-{order._id.slice(-6)}
+                  </div>
+                </div>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                    order.status === "Pending"
+                      ? "bg-orange-50 text-orange-500"
+                      : order.status === "Confirmed"
+                        ? "bg-blue-50 text-blue-600"
+                        : order.status === "Delivered"
+                          ? "bg-green-50 text-green-600"
+                          : "bg-red-50 text-red-500"
+                  }`}
+                >
+                  {order.status}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="font-black text-brand text-sm">
+                  {order.totalAmount}BDT
+                </span>
+                <span className="text-[9px] bg-gray-100 text-gray-500 rounded px-2 py-0.5 font-bold uppercase">
+                  {order.payment.provider}
+                </span>
+                <span className="text-[10px] font-mono font-bold text-gray-300 uppercase">
+                  Trx: {order.payment.transactionId}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 mt-2 flex-col xs:flex-row">
+                {order.status === "Pending" && (
+                  <>
+                    <button
+                      onClick={() => updateOrderStatus(order._id, "Confirmed")}
+                      className="flex-1 px-2 py-2 bg-green-50 text-green-600 rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-green-600 hover:text-white transition-all cursor-pointer"
+                    >
+                      <Check size={16} /> Confirm
+                    </button>
+                    <button
+                      onClick={() => updateOrderStatus(order._id, "Canceled")}
+                      className="flex-1 px-2 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all cursor-pointer"
+                    >
+                      <X size={16} /> Cancel
+                    </button>
+                  </>
+                )}
+                {order.status === "Confirmed" && (
+                  <button
+                    onClick={() => updateOrderStatus(order._id, "Delivered")}
+                    className="flex-1 px-2 py-2 bg-black text-white rounded-xl text-xs font-black uppercase hover:bg-brand transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Truck size={14} /> Deliver
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedOrder(order)}
+                  className="flex-1 px-2 py-2 bg-gray-100 text-gray-400 rounded-xl text-xs flex items-center gap-2 hover:text-black transition-all cursor-pointer justify-center"
+                >
+                  <Eye size={15} /> View
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* --- MODAL --- */}
@@ -233,7 +342,7 @@ export default function AdminOrders() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed inset-0 m-auto w-full max-w-2xl h-fit max-h-[95vh] bg-white rounded-[40px] shadow-2xl z-[101] overflow-hidden flex flex-col p-8 md:p-10 font-jakarta text-left"
+              className="fixed inset-0 m-auto w-full max-w-xs sm:max-w-md md:max-w-lg xl:max-w-2xl h-fit max-h-[95vh] bg-white rounded-[20px] md:rounded-[36px] xl:rounded-[40px] shadow-2xl z-[101] overflow-hidden flex flex-col p-4 sm:p-6 md:p-10 font-jakarta text-left"
             >
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -351,7 +460,7 @@ export default function AdminOrders() {
                         <div className="flex justify-between items-center border-t border-gray-200 pt-2 text-red-500">
                           <span className="text-xs font-bold">Cash Due</span>
                           <span className="text-sm font-black tracking-tighter">
-                            {parseInt(selectedOrder.totalAmount) - 120}BDT
+                            {selectedOrder.totalAmount - 120}BDT
                           </span>
                         </div>
                       </div>
@@ -370,7 +479,7 @@ export default function AdminOrders() {
                     <Package size={14} /> Items Ordered
                   </h3>
                   <div className="space-y-2">
-                    {selectedOrder.items.map((item: any, i: number) => (
+                    {selectedOrder.items.map((item, i: number) => (
                       <div
                         key={i}
                         className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl"

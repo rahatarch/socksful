@@ -15,15 +15,26 @@ import {
   Loader2,
 } from "lucide-react";
 
+// Better TypeScript usage for customers
+interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  joined: string;
+  status: "Active" | "Banned";
+  totalOrders: number;
+}
+
 export default function AdminCustomers() {
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await fetch("/api/customers", { cache: 'no-store' });
+        const res = await fetch("/api/customers", { cache: "no-store" });
         const data = await res.json();
         if (data.success) {
           setCustomers(data.data);
@@ -36,7 +47,9 @@ export default function AdminCustomers() {
     };
     fetchCustomers();
   }, []);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
 
   // সার্চ লজিক
   const filteredCustomers = useMemo(() => {
@@ -52,7 +65,9 @@ export default function AdminCustomers() {
     const customer = customers.find((c) => c.id === id);
     if (!customer) return;
 
-    const newStatus = customer.status === "Active" ? "Banned" : "Active";
+    // Ensure TypeScript knows this will match our "Active" | "Banned" type
+    const newStatus: Customer["status"] =
+      customer.status === "Active" ? "Banned" : "Active";
 
     try {
       const res = await fetch(`/api/customers/${id}`, {
@@ -65,7 +80,7 @@ export default function AdminCustomers() {
         setCustomers((prev) =>
           prev.map((c) => {
             if (c.id === id) {
-              const updated = { ...c, status: newStatus };
+              const updated: Customer = { ...c, status: newStatus };
               if (selectedCustomer?.id === id) setSelectedCustomer(updated);
               return updated;
             }
@@ -83,7 +98,9 @@ export default function AdminCustomers() {
       {loading && (
         <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-[200] flex flex-col items-center justify-center gap-4">
           <Loader2 className="animate-spin text-brand" size={40} />
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Syncing Community...</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            Syncing Community...
+          </p>
         </div>
       )}
       {/* হেডার */}

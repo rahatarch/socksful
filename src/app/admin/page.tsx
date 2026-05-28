@@ -15,7 +15,14 @@ import {
 export default function AdminDashboard() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [orders, setOrders] = useState<any[]>([]);
+  interface Order {
+    _id: string;
+    createdAt: string;
+    items: { name: string; quantity: number; price: number }[];
+    totalAmount: number | string;
+    status: "Pending" | "Confirmed" | "Delivered" | "Canceled";
+  }
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
@@ -50,7 +57,11 @@ export default function AdminDashboard() {
       totalSell: filtered.filter((o) => o.status !== "Canceled").length,
       income: filtered
         .filter((o) => o.status !== "Canceled")
-        .reduce((sum, o) => sum + parseInt(String(o.totalAmount || 0).replace("BDT", "")), 0),
+        .reduce(
+          (sum, o) =>
+            sum + parseInt(String(o.totalAmount || 0).replace("BDT", "")),
+          0,
+        ),
       pending: filtered.filter((o) => o.status === "Pending").length,
       confirmed: filtered.filter((o) => o.status === "Confirmed").length,
       delivered: filtered.filter((o) => o.status === "Delivered").length,
@@ -58,12 +69,42 @@ export default function AdminDashboard() {
     };
 
     return [
-      { name: "Total Sell", value: counts.totalSell, icon: <TrendingUp />, color: "bg-blue-50 text-blue-600" },
-      { name: "Total Income", value: `${counts.income.toLocaleString()}BDT`, icon: <Banknote />, color: "bg-green-50 text-green-600" },
-      { name: "Pending", value: counts.pending, icon: <Clock />, color: "bg-orange-50 text-orange-600" },
-      { name: "Confirmed", value: counts.confirmed, icon: <CheckCircle2 />, color: "bg-purple-50 text-purple-600" },
-      { name: "Delivered", value: counts.delivered, icon: <Truck />, color: "bg-emerald-50 text-emerald-600" },
-      { name: "Canceled", value: counts.canceled, icon: <XCircle />, color: "bg-red-50 text-red-600" },
+      {
+        name: "Total Sell",
+        value: counts.totalSell,
+        icon: <TrendingUp />,
+        color: "bg-blue-50 text-blue-600",
+      },
+      {
+        name: "Total Income",
+        value: `${counts.income.toLocaleString()}BDT`,
+        icon: <Banknote />,
+        color: "bg-green-50 text-green-600",
+      },
+      {
+        name: "Pending",
+        value: counts.pending,
+        icon: <Clock />,
+        color: "bg-orange-50 text-orange-600",
+      },
+      {
+        name: "Confirmed",
+        value: counts.confirmed,
+        icon: <CheckCircle2 />,
+        color: "bg-purple-50 text-purple-600",
+      },
+      {
+        name: "Delivered",
+        value: counts.delivered,
+        icon: <Truck />,
+        color: "bg-emerald-50 text-emerald-600",
+      },
+      {
+        name: "Canceled",
+        value: counts.canceled,
+        icon: <XCircle />,
+        color: "bg-red-50 text-red-600",
+      },
     ];
   }, [orders, startDate, endDate]);
 
@@ -72,11 +113,16 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="p-6 md:p-10 text-left font-jakarta relative" suppressHydrationWarning>
+    <div
+      className="p-6 md:p-10 text-left font-jakarta relative"
+      suppressHydrationWarning
+    >
       {loading && (
         <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-[200] flex flex-col items-center justify-center gap-4">
           <Loader2 className="animate-spin text-brand" size={40} />
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Updating Stats...</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            Updating Stats...
+          </p>
         </div>
       )}
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">

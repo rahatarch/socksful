@@ -25,8 +25,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} ${instrument.variable}`}>
       <body
-        className="font-jakarta antialiased"
-        suppressHydrationWarning={true} // ব্রাউজার এক্সটেনশন জনিত হাইড্রেশন এরর ফিক্স করার জন্য
+        className="w-full min-h-screen max-w-full font-jakarta text-left antialiased bg-white px-0 sm:px-0 overflow-x-hidden"
+        suppressHydrationWarning={true}
       >
         {/* মেইন কন্টেন্ট */}
         {children}

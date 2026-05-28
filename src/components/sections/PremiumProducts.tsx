@@ -4,7 +4,16 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 export default function PremiumProducts() {
-  const [products, setProducts] = useState<any[]>([]);
+  interface PremiumProduct {
+    id: string;
+    name: string;
+    price: string;
+    oldPrice?: string;
+    image?: string;
+    tag?: string;
+  }
+
+  const [products, setProducts] = useState<PremiumProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,10 +23,15 @@ export default function PremiumProducts() {
         const data = await res.json();
         if (data.success) {
           // Filter specifically for products marked as 'isFeatured' for the home lineup
-          const featured = data.data
-            .filter((p: any) => p.isFeatured === true)
+          // Make sure data.data is typed before filtering/mapping
+          const featured = (
+            data.data as Array<
+              PremiumProduct & { isFeatured: boolean; _id: string }
+            >
+          )
+            .filter((p) => p.isFeatured === true)
             .slice(0, 3)
-            .map((p: any) => ({ ...p, id: p._id }));
+            .map((p) => ({ ...p, id: p._id }));
           setProducts(featured);
         }
       } catch (error) {
@@ -33,7 +47,9 @@ export default function PremiumProducts() {
     return (
       <div className="py-28 flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-brand" size={32} />
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Loading Featured Lineup...</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+          Loading Featured Lineup...
+        </p>
       </div>
     );
   }
@@ -66,6 +82,7 @@ export default function PremiumProducts() {
               {/* ইমেজ কন্টেইনার */}
               <div className="relative aspect-square bg-gray-50 rounded-[24px] md:rounded-[30px] mb-6 flex items-center justify-center overflow-hidden">
                 {p.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={p.image}
                     alt={p.name}

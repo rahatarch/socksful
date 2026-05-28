@@ -263,7 +263,7 @@ export default function AdminProducts() {
               categories and tags.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             <Link
               href="/admin/settings"
               className="p-3 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2 cursor-pointer"
@@ -282,7 +282,7 @@ export default function AdminProducts() {
           </div>
         </div>
 
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full max-w-full md:max-w-md">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             size={18}
@@ -298,16 +298,17 @@ export default function AdminProducts() {
       </header>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {filteredProducts.map((p) => (
           <div
             key={p.id}
-            className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm group hover:shadow-xl transition-all flex flex-col relative"
+            className="bg-white p-3 sm:p-5 rounded-[24px] md:rounded-[32px] xl:rounded-[40px] border border-gray-100 shadow-sm group hover:shadow-xl transition-all flex flex-col relative min-w-0"
           >
             <div
-              className={`aspect-square ${p.color || "bg-gray-50"} rounded-[32px] mb-6 flex items-center justify-center relative overflow-hidden`}
+              className={`aspect-square w-full max-w-full ${p.color || "bg-gray-50"} rounded-[18px] md:rounded-[32px] mb-4 md:mb-6 flex items-center justify-center relative overflow-hidden`}
             >
               {p.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={p.image}
                   alt={p.name}
@@ -341,7 +342,7 @@ export default function AdminProducts() {
               )}
             </div>
 
-            <div className="flex-1 px-2">
+            <div className="flex-1 px-1 md:px-2">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-bold text-black leading-tight">
                   {p.name}
@@ -365,7 +366,7 @@ export default function AdminProducts() {
               </p>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-gray-50 flex gap-2">
+            <div className="mt-4 md:mt-6 pt-4 md:pt-5 border-t border-gray-50 flex flex-col md:flex-row gap-2">
               <button
                 onClick={() => {
                   setEditingProduct(p);
@@ -420,7 +421,7 @@ export default function AdminProducts() {
                     }
                   }
                 }}
-                className="p-3.5 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all cursor-pointer"
+                className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all cursor-pointer"
               >
                 <Trash2 size={18} />
               </button>
@@ -448,7 +449,7 @@ export default function AdminProducts() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 30 }}
-              className="fixed inset-0 m-auto w-full max-w-2xl h-fit max-h-[90vh] bg-white rounded-[40px] shadow-2xl z-[101] p-8 md:p-10 overflow-y-auto no-scrollbar"
+              className="fixed inset-0 m-auto w-full max-w-xs sm:max-w-md md:max-w-lg xl:max-w-2xl h-fit max-h-[90vh] bg-white rounded-[24px] md:rounded-[40px] shadow-2xl z-[101] p-4 sm:p-6 md:p-8 lg:p-10 overflow-y-auto no-scrollbar"
             >
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold">
@@ -490,6 +491,7 @@ export default function AdminProducts() {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {formData.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={formData.image}
                       alt="Preview"

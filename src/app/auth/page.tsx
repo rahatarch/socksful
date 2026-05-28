@@ -54,8 +54,9 @@ export default function AuthPage() {
         // Switch to OTP verification UI
         setIsVerifying(true);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError(String(err));
     } finally {
       setIsLoading(false);
     }
@@ -81,8 +82,9 @@ export default function AuthPage() {
 
       localStorage.setItem("socksful-user", JSON.stringify(data.user));
       router.push("/checkout");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError(String(err));
     } finally {
       setIsLoading(false);
     }

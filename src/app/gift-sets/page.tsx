@@ -25,7 +25,18 @@ const itemVariants: Variants = {
 export default function GiftSetsPage() {
   const [activeCategory, setActiveCategory] = useState("All Sets");
   const [categories, setCategories] = useState<string[]>(["All Sets"]);
-  const [allProducts, setAllProducts] = useState<any[]>([]);
+  interface GiftSetProduct {
+    id: string;
+    name: string;
+    image?: string;
+    color?: string;
+    tag?: string;
+    price: string;
+    oldPrice?: string;
+    showIn?: string;
+    category?: string;
+  }
+  const [allProducts, setAllProducts] = useState<GiftSetProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,7 +53,11 @@ export default function GiftSetsPage() {
 
         if (prodData.success) {
           // Map MongoDB _id to id for component compatibility
-          setAllProducts(prodData.data.map((p: any) => ({ ...p, id: p._id })));
+          setAllProducts(
+            (prodData.data as Array<GiftSetProduct & { _id: string }>).map(
+              (p) => ({ ...p, id: p._id }),
+            ),
+          );
         }
 
         if (catData.success) {
@@ -89,11 +104,11 @@ export default function GiftSetsPage() {
       <div className="max-w-[1440px] mx-auto px-4 md:px-12 pt-24 md:pt-32 pb-20 font-jakarta">
         <div className="flex flex-col lg:flex-row gap-8 md:gap-12">
           {/* Side Navigation - Dynamic from Database */}
-          <aside className="w-full lg:w-64 shrink-0">
+          <aside className="w-full min-w-0 flex flex-row lg:flex-col gap-2 overflow-x-auto no-scrollbar lg:w-64 shrink-0">
             <h2 className="hidden lg:block text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-8 px-2">
               Gift Occasions
             </h2>
-            <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 no-scrollbar">
+            <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 no-scrollbar min-w-0">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -134,7 +149,7 @@ export default function GiftSetsPage() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8"
+              className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8"
             >
               <AnimatePresence mode="popLayout">
                 {filteredSets.map((s) => (
@@ -145,12 +160,13 @@ export default function GiftSetsPage() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="group bg-white p-4 md:p-5 rounded-[32px] md:rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full active:scale-[0.98] lg:active:scale-100"
+                    className="group bg-white p-2 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[32px] md:rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full active:scale-[0.98] lg:active:scale-100 min-w-0"
                   >
                     <div
-                      className={`relative aspect-square ${s.color || "bg-gray-50"} rounded-[24px] md:rounded-[32px] mb-6 flex items-center justify-center overflow-hidden`}
+                      className={`relative aspect-square w-full max-w-full ${s.color || "bg-gray-50"} rounded-[14px] sm:rounded-[24px] md:rounded-[32px] mb-2 sm:mb-4 md:mb-6 flex items-center justify-center overflow-hidden`}
                     >
                       {s.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={s.image}
                           alt={s.name}

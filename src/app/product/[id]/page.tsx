@@ -13,7 +13,21 @@ export default function ProductDetails({
 }) {
   const resolvedParams = use(params);
   const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState<any>(null);
+  // Product interface for type safety
+  interface Product {
+    id: string;
+    _id?: string;
+    name: string;
+    price: string;
+    oldPrice?: string;
+    description?: string;
+    stock: number;
+    image?: string;
+    color?: string;
+    tag?: string;
+  }
+
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
 
@@ -23,9 +37,11 @@ export default function ProductDetails({
         const res = await fetch("/api/products");
         const data = await res.json();
         if (data.success) {
-          const found = data.data.find((p: any) => p._id === resolvedParams.id);
+          const found: Product | undefined = data.data.find(
+            (p: Product) => p._id === resolvedParams.id,
+          );
           if (found) {
-            setProduct({ ...found, id: found._id });
+            setProduct({ ...found, id: found._id ?? "" });
             setQuantity(found.stock > 0 ? 1 : 0);
           }
         }
@@ -54,7 +70,9 @@ export default function ProductDetails({
         <Navbar />
         <div className="h-[70vh] flex flex-col items-center justify-center gap-4 text-center">
           <Loader2 className="animate-spin text-brand" size={40} />
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Loading Details...</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+            Loading Details...
+          </p>
         </div>
         <Footer />
       </main>
@@ -67,7 +85,9 @@ export default function ProductDetails({
         <Navbar />
         <div className="h-[70vh] flex flex-col items-center justify-center gap-4 text-center">
           <h2 className="text-2xl font-bold">Product Not Found</h2>
-          <p className="text-gray-400">The item you are looking for does not exist.</p>
+          <p className="text-gray-400">
+            The item you are looking for does not exist.
+          </p>
         </div>
         <Footer />
       </main>
@@ -78,7 +98,7 @@ export default function ProductDetails({
     <main className="bg-white min-h-screen font-jakarta text-left">
       <Navbar />
 
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 pt-28 md:pt-40 pb-20">
+      <div className="max-w-[1440px] mx-auto px-2 sm:px-4 md:px-8 pt-20 sm:pt-28 md:pt-40 pb-6 sm:pb-10 md:pb-20">
         {/* ব্রেডক্রাম্ব */}
         <nav className="flex items-center gap-2 text-xs md:text-sm text-gray-400 mb-8 md:mb-12 overflow-x-auto whitespace-nowrap no-scrollbar">
           <span className="hover:text-black cursor-pointer transition-colors">
@@ -92,15 +112,16 @@ export default function ProductDetails({
           <span className="text-black font-bold">{product.name}</span>
         </nav>
 
-        <div className="flex flex-col lg:flex-row gap-12 md:gap-20 text-left">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-10 md:gap-20 text-left">
           {/* ইমেজ সেকশন */}
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 min-w-0 space-y-3 md:space-y-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`aspect-square ${product.color || "bg-[#fafafa]"} rounded-[40px] md:rounded-[60px] flex items-center justify-center overflow-hidden relative group`}
+              className={`aspect-square w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto ${product.color || "bg-[#fafafa]"} rounded-[24px] sm:rounded-[40px] md:rounded-[60px] flex items-center justify-center overflow-hidden relative group`}
             >
               {product.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={product.image}
                   alt={product.name}
@@ -118,7 +139,7 @@ export default function ProductDetails({
               )}
             </motion.div>
 
-            <div className="grid grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
@@ -133,7 +154,7 @@ export default function ProductDetails({
           </div>
 
           {/* প্রোডাক্ট ইনফরমেশন */}
-          <div className="flex-1 flex flex-col pt-4 md:pt-0 items-start">
+          <div className="flex-1 min-w-0 flex flex-col pt-2 sm:pt-4 md:pt-0 items-start">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -153,21 +174,30 @@ export default function ProductDetails({
                     {product.oldPrice}BDT
                   </span>
                 )}
-                <span className={`text-xs font-bold uppercase px-3 py-1 rounded-full ${
-                  product.stock > 5 ? 'bg-green-50 text-green-600' :
-                  product.stock > 0 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'
-                }`}>
-                  {product.stock > 5 ? 'In Stock' :
-                   product.stock > 0 ? `Low Stock (${product.stock} left)` : 'Out of Stock'}
+                <span
+                  className={`text-xs font-bold uppercase px-3 py-1 rounded-full ${
+                    product.stock > 5
+                      ? "bg-green-50 text-green-600"
+                      : product.stock > 0
+                        ? "bg-orange-50 text-orange-500"
+                        : "bg-red-50 text-red-500"
+                  }`}
+                >
+                  {product.stock > 5
+                    ? "In Stock"
+                    : product.stock > 0
+                      ? `Low Stock (${product.stock} left)`
+                      : "Out of Stock"}
                 </span>
               </div>
 
               <p className="text-gray-500 text-base md:text-lg leading-relaxed mb-10 font-medium max-w-xl text-left">
-                {product.description || `Experience the ultimate comfort with our signature ${product.name} series. Crafted with long-staple organic cotton for maximum breathability and durability. One size fits all design for perfect stretch and grip.`}
+                {product.description ||
+                  `Experience the ultimate comfort with our signature ${product.name} series. Crafted with long-staple organic cotton for maximum breathability and durability. One size fits all design for perfect stretch and grip.`}
               </p>
 
               {/* বাটন সেকশন - ফিক্সড কোড */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 w-full">
                 {/* কোয়ান্টিটি পিকার - হাইট ফিক্সড করা হয়েছে */}
                 <div className="flex items-center justify-between bg-gray-50 rounded-2xl p-2 border border-gray-100 min-h-[60px] md:min-h-[64px] w-full sm:w-auto">
                   <button
@@ -182,7 +212,9 @@ export default function ProductDetails({
                   </span>
                   <button
                     disabled={product.stock <= 0}
-                    onClick={() => setQuantity(Math.min(product.stock || 0, quantity + 1))}
+                    onClick={() =>
+                      setQuantity(Math.min(product.stock || 0, quantity + 1))
+                    }
                     className="w-12 h-12 flex items-center justify-center text-2xl font-bold cursor-pointer hover:text-brand transition-colors text-black disabled:opacity-30 disabled:hover:text-black"
                   >
                     +

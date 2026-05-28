@@ -145,10 +145,10 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 transition-all">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-12 h-16 flex items-center justify-between text-black relative">
+      <div className="max-w-[1440px] mx-auto px-2 sm:px-4 md:px-8 lg:px-12 h-14 sm:h-16 md:h-20 flex items-center justify-between text-black relative min-w-0">
         {/* লোগো ও থিম সুইচার */}
         {!isSearchOpen && (
-          <div className="flex items-center gap-4 md:gap-12 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 lg:gap-12 shrink-0 min-w-0">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-1 hover:text-brand transition-colors cursor-pointer"
@@ -182,7 +182,7 @@ export default function Navbar() {
 
         {/* নেভিগেশন লিঙ্কসমূহ */}
         {!isSearchOpen && (
-          <div className="hidden lg:flex items-center space-x-10 px-8">
+          <div className="hidden lg:flex items-center gap-6 xl:gap-10 px-3 sm:px-6 md:px-8 lg:px-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -225,7 +225,7 @@ export default function Navbar() {
             </button>
           </form>
         ) : (
-          <div className="flex items-center gap-3 md:gap-8 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 shrink-0 min-w-0">
             {/* ডেক্সটপ অ্যাকাউন্ট বাটন */}
             <div className="relative">
               <button
@@ -303,7 +303,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "100vh" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden absolute top-16 left-0 w-full bg-white z-40 overflow-hidden px-8 pt-6"
+            className="lg:hidden absolute top-14 sm:top-16 left-0 w-full bg-white z-40 overflow-hidden px-2 sm:px-6 md:px-8 pt-4 sm:pt-6"
           >
             <div className="flex flex-col space-y-6">
               {/* মোবাইল ইউজার কার্ড */}

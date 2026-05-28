@@ -30,7 +30,20 @@ function CollectionsContent() {
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
-  const [allProducts, setAllProducts] = useState<any[]>([]);
+  // Strongly typed product interface for collections
+  interface CollectionProduct {
+    id: string;
+    name: string;
+    image?: string;
+    color?: string;
+    tag?: string;
+    price: string;
+    oldPrice?: string;
+    showIn?: string;
+    category?: string;
+  }
+
+  const [allProducts, setAllProducts] = useState<CollectionProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +60,14 @@ function CollectionsContent() {
 
         if (prodData.success) {
           // Map MongoDB _id to id for component compatibility
-          setAllProducts(prodData.data.map((p: any) => ({ ...p, id: p._id })));
+          setAllProducts(
+            (prodData.data as Array<CollectionProduct & { _id: string }>).map(
+              (p) => ({
+                ...p,
+                id: p._id,
+              }),
+            ),
+          );
         }
 
         if (catData.success) {
@@ -90,10 +110,10 @@ function CollectionsContent() {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 md:px-12 pt-24 md:pt-32 pb-20 font-jakarta text-left">
+    <div className="max-w-[1440px] mx-auto px-2 sm:px-4 md:px-12 pt-16 sm:pt-24 md:pt-32 pb-10 md:pb-20 font-jakarta text-left">
       <div className="flex flex-col gap-10">
         {/* Top Horizontal Filter - Ekhon database theke dynamic asche */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar border-b border-gray-100">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-4 sm:pb-6 no-scrollbar border-b border-gray-100">
           <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mr-4 shrink-0">
             Filter By
           </span>
@@ -139,12 +159,12 @@ function CollectionsContent() {
                   </span>
                 </div>
 
-                <motion.div
+                                <motion.div
                   layout
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8"
+                  className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8"
                 >
                   <AnimatePresence mode="popLayout">
                     {displayedProducts.map((p) => (
@@ -155,12 +175,13 @@ function CollectionsContent() {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="group bg-white p-4 md:p-5 rounded-[32px] md:rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full active:scale-[0.98] lg:active:scale-100"
+                                                className="group bg-white p-2 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[32px] md:rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full active:scale-[0.98] lg:active:scale-100 min-w-0"
                       >
                         <div
-                          className={`relative aspect-square ${p.color || "bg-gray-50"} rounded-[24px] md:rounded-[32px] mb-6 flex items-center justify-center overflow-hidden`}
+                          className={`relative aspect-square w-full max-w-full ${p.color || "bg-gray-50"} rounded-[14px] sm:rounded-[24px] md:rounded-[32px] mb-2 sm:mb-4 md:mb-6 flex items-center justify-center overflow-hidden`}
                         >
                           {p.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.image}
                               alt={p.name}
